@@ -242,6 +242,7 @@
         <easytemplate>
             <configuration>
                 <use_in_categories>1</use_in_categories>
+                <custom_output_in_category>0</custom_output_in_category>
                 <automatically_clean_database>0</automatically_clean_database>
                 <cache_lifetime>5</cache_lifetime>
             </configuration>

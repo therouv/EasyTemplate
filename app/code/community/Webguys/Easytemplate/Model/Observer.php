@@ -26,14 +26,14 @@ class Webguys_Easytemplate_Model_Observer extends Mage_Core_Model_Abstract
                     'view_mode',
                     'select',
                     array(
-                        'label' => Mage::helper('easytemplate')->__('Mode'),
-                        'title' => Mage::helper('easytemplate')->__('View Mode'),
-                        'name' => 'view_mode',
+                        'label'    => Mage::helper('easytemplate')->__('Mode'),
+                        'title'    => Mage::helper('easytemplate')->__('View Mode'),
+                        'name'     => 'view_mode',
                         'required' => true,
-                        'options' => $sourceModel->toArray(),
-                        'note' => Mage::helper('easytemplate')->__('Use the template engine or default behavior'),
+                        'options'  => $sourceModel->toArray(),
+                        'note'     => Mage::helper('easytemplate')->__('Use the template engine or default behavior'),
                         'disabled' => false,
-                        'onchange' => "if($('page_tabs_content_section')) { if(this.value=='easytemplate') { $('page_tabs_content_section').hide(); $('page_content').removeClassName('required-entry'); } else { $('page_tabs_content_section').show(); $('page_content').addClassName('required-entry'); } }"
+                        'onchange' => "if($('page_tabs_content_section')) { if(this.value=='easytemplate') { $('page_tabs_content_section').hide(); $('page_content').removeClassName('required-entry'); } else { $('page_tabs_content_section').show(); $('page_content').addClassName('required-entry'); } }",
                     )
                 );
                 /** Break the loop after default/first fieldset */
@@ -79,8 +79,10 @@ class Webguys_Easytemplate_Model_Observer extends Mage_Core_Model_Abstract
             /** @var $helper Webguys_Easytemplate_Helper_Category */
             $helper = Mage::helper('easytemplate/category');
 
+            $storeId = Mage::app()->getStore()->getId();
+
             if ($category->getUseEasytemplate()) {
-                if ($group = $helper->getGroupByCategoryId($category->getId(), Mage::app()->getStore()->getId(), true)) {
+                if ($group = $helper->getGroupByCategoryId($category->getId(), $storeId, true)) {
                     // Override display mode if not configured correctly
 
                     /** @var $curCategory Mage_Catalog_Model_Category */
@@ -95,7 +97,12 @@ class Webguys_Easytemplate_Model_Observer extends Mage_Core_Model_Abstract
                     $renderer->setGroup($group);
                     $renderer->setParentBlock($block);
 
-                    $block->setCmsBlockHtml($renderer->toHtml());
+                    $isCustomOutput = Mage::getStoreConfigFlag('easytemplate/configuration/custom_output_in_category', $storeId);
+                    if ($isCustomOutput) {
+                        $block->setEasytemplateHtml($renderer->toHtml());
+                    } else {
+                        $block->setCmsBlockHtml($renderer->toHtml());
+                    }
                 }
             }
         }
@@ -184,13 +191,13 @@ class Webguys_Easytemplate_Model_Observer extends Mage_Core_Model_Abstract
             $block->addColumnAfter(
                 'view_mode',
                 array(
-                    'header' => Mage::helper('easytemplate')->__('Mode'),
-                    'index' => 'view_mode',
-                    'width' => '100px',
+                    'header'           => Mage::helper('easytemplate')->__('Mode'),
+                    'index'            => 'view_mode',
+                    'width'            => '100px',
                     'header_css_class' => 'view_mode',
-                    'sortable' => true,
-                    'type' => 'options',
-                    'options' => $sourceModel->toArray(false),
+                    'sortable'         => true,
+                    'type'             => 'options',
+                    'options'          => $sourceModel->toArray(false),
                 ),
                 'root_template'
             );
@@ -206,7 +213,7 @@ class Webguys_Easytemplate_Model_Observer extends Mage_Core_Model_Abstract
             $tabs->addTab(
                 'easytemplate',
                 array(
-                    'label' => Mage::helper('catalog')->__('Easy template'),
+                    'label'   => Mage::helper('catalog')->__('Easy template'),
                     'content' => $tabs->getLayout()->getBlock('adminhtml_category_templates')->toHtml(),
                 )
             );
